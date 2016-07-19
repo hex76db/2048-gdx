@@ -22,7 +22,7 @@ public class Grid {
         }
     }
 
-    private final int SIZE = 2;
+    public static final int SIZE = 4;
 
     private int mScore;
     private Tile[] mGrid;
@@ -142,6 +142,14 @@ public class Grid {
             }
         }
         return true;
+    }
+
+    public void moveTileTo(int x, int y, Tile tile) {
+
+    }
+
+    public void animateTileCreation(int x, int y, Tile tile) {
+
     }
 
     @Override
