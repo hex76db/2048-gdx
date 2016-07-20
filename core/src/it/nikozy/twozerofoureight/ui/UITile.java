@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import it.nikozy.twozerofoureight.util.GameConfiguration;
@@ -20,20 +19,20 @@ public class UITile extends Image {
     private int mValue;
     private BitmapFont mFont;
 
-    public UITile(int value) {
-        init(value);
+    public UITile(int value, boolean effect) {
+        init(value, effect);
     }
 
-    public void init(int value) {
+    public void init(int value, boolean effect) {
         setDrawable(new TextureRegionDrawable(new TextureRegion(getBackground(value))));
         setOrigin(64.f, 64.f);
         mValue = value;
         mFont = ASSETS.get(GameConfiguration.FONT_FILE, BitmapFont.class);
-        addAction(sequence(scaleTo(1.25f, 1.25f, 0.1f, Interpolation.circle), scaleTo(0.75f, 0.75f, 0.1f, Interpolation.circle), scaleTo(1.0f, 1.0f, 0.1f, Interpolation.circle)));
+        if(effect) addAction(sequence(scaleTo(1.25f, 1.25f, 0.1f, Interpolation.circle), scaleTo(0.75f, 0.75f, 0.1f, Interpolation.circle), scaleTo(1.0f, 1.0f, 0.1f, Interpolation.circle)));
     }
 
     public void moveTile(int ix, int iy, int fx, int fy) {
-        
+        setPosition(fx, fy);
     }
 
     @Override

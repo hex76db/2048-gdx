@@ -9,13 +9,14 @@ import com.badlogic.gdx.math.MathUtils;
 public class Utilities {
     public static AssetManager ASSETS;
     public static Texture[] BACKGROUND;
+    public static Texture GRAY_TEXTURE;
 
     public static Texture getBackground(int value) {
         return BACKGROUND[(int) MathUtils.log2(value) - 1];
     }
 
     public static void generateBackground() {
-        BACKGROUND = new Texture[(int) MathUtils.log2(2048)];
+        BACKGROUND = new Texture[(int) MathUtils.log2(2048) + 1];
         for(int i = 0; i < (int) MathUtils.log2(2048); i++) {
             Pixmap p = new Pixmap(128, 128, Pixmap.Format.RGBA8888);
             switch (i) {
@@ -56,5 +57,9 @@ public class Utilities {
             p.fill();
             BACKGROUND[i] = new Texture(p);
         }
+        Pixmap p = new Pixmap(Grid.SIZE * 128, Grid.SIZE * 128, Pixmap.Format.RGBA8888);
+        p.setColor(Color.LIGHT_GRAY);
+        p.fill();
+        GRAY_TEXTURE = new Texture(p);
     }
 }

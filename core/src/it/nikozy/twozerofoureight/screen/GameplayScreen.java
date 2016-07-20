@@ -6,13 +6,13 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import it.nikozy.twozerofoureight.ui.UITile;
 import it.nikozy.twozerofoureight.util.Grid;
+import it.nikozy.twozerofoureight.util.Utilities;
 
-import static it.nikozy.twozerofoureight.util.GameConfiguration.*;
+import static it.nikozy.twozerofoureight.util.GameConfiguration.VIEWPORT_HEIGHT;
+import static it.nikozy.twozerofoureight.util.GameConfiguration.VIEWPORT_WIDTH;
 
 public class GameplayScreen implements Screen {
     public final String TAG = GameplayScreen.class.getName();
@@ -25,20 +25,30 @@ public class GameplayScreen implements Screen {
     public void show() {
         Gdx.app.log(TAG, "show()");
         mStage = new Stage(new StretchViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT));
-        mStage.setDebugAll(true);
         mCells = new Cell[mGameLogic.SIZE * mGameLogic.SIZE];
 
+        Label highscore = new Label("MOVE ARROWS TO PLAY", new Skin(Gdx.files.internal("uiskin.json")), "default");
+        highscore.setPosition(VIEWPORT_WIDTH / 6, VIEWPORT_HEIGHT - 100);
+        mStage.addActor(highscore);
         Table table = new Table();
         table.setFillParent(true);
         table.setTransform(true);
-        mStage.addActor(table);
+        table.setDebug(true);
 
         for(int i = 0; i < mGameLogic.SIZE * mGameLogic.SIZE; i++) {
             if(i % mGameLogic.SIZE == 0) table.row();
             mCells[i] = table.add().size(128.0f);
         }
+        table.pack();
 
-        mGameLogic = new Grid(mCells);
+        Gdx.app.log(TAG, String.format("x %f, y %f", table.getX(), table.getY()));
+        Image back = new Image(Utilities.GRAY_TEXTURE);
+        back.setBounds(0.0f + 44.f, 0.0f + 144, 128 * Grid.SIZE, 128 * Grid.SIZE);
+        back.setDebug(true);
+        mStage.addActor(back);
+        mStage.addActor(table);
+
+        mGameLogic = new Grid(mCells, highscore);
         Gdx.input.setInputProcessor(new InputProcessor() {
             @Override
             public boolean keyDown(int keycode) {
@@ -66,10 +76,10 @@ public class GameplayScreen implements Screen {
                         mGameLogic.init();
                         Gdx.app.log(TAG, "\n" + mGameLogic.toString());
                         break;
-                    case Input.Keys.A:
+                    /*case Input.Keys.A:
                         mGameLogic.addTile();
                         Gdx.app.log(TAG, "\n" + mGameLogic.toString());
-                        break;
+                        break;*/
 
                 }
                 return false;

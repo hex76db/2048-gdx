@@ -2,6 +2,7 @@ package it.nikozy.twozerofoureight.util;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import it.nikozy.twozerofoureight.ui.UITile;
 
 import java.util.ArrayList;
@@ -32,11 +33,13 @@ public class Grid {
     private int mScore;
     private Tile[] mGrid;
     private Cell[] mTiles;
+    private Label mLabel;
 
-
-    public Grid(Cell[] tiles) {
+    public Grid(Cell[] tiles, Label label) {
         setTiles(tiles);
+        setLabel(label);
         init();
+        mLabel.setText("MOVE ARROWS TO PLAY");
     }
 
     public void init() {
@@ -45,6 +48,7 @@ public class Grid {
         for(int i = 0; i < SIZE * SIZE; i++) mGrid[i] = new Tile(0, i % SIZE, i / SIZE);
         mScore = 0;
 
+        addTile();
         addTile();
     }
 
@@ -143,6 +147,9 @@ public class Grid {
             }
 
         if(moved) addTile();
+
+        if(!isGameOver()) mLabel.setText("SCORE: " + mScore);
+        else mLabel.setText("PRESS R TO RESTART");
     }
 
     public boolean isGameOver() {
@@ -163,19 +170,19 @@ public class Grid {
     }
 
     public void moveTileTo(int ix, int iy, int fx, int fy) {
-        UITile a = new UITile(getTile(fx, fy).Value);
+        UITile a = new UITile(getTile(fx, fy).Value, false);
         mTiles[fy * SIZE + fx].setActor(a);
         mTiles[iy * SIZE + ix].clearActor();
         a.moveTile(ix, iy, fx, fy);
     }
 
     public void animateTileCreation(int x, int y, int value) {
-        mTiles[y * SIZE + x].setActor(new UITile(value));
+        mTiles[y * SIZE + x].setActor(new UITile(value, true));
     }
 
     public void animateTileMerging(int x, int y, int value, int oldx, int oldy) {
         UITile t = (UITile) mTiles[y * SIZE + x].getActor();
-        t.init(value);
+        t.init(value, true);
         mTiles[oldy * SIZE + oldx].clearActor();
     }
 
@@ -193,5 +200,9 @@ public class Grid {
 
     public void setTiles(Cell[] cells) {
         mTiles = cells;
+    }
+
+    public void setLabel(Label l) {
+        mLabel = l;
     }
 }
