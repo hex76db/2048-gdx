@@ -5,7 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import it.nikozy.twozerofoureight.screen.GameplayScreen;
-import it.nikozy.twozerofoureight.util.Globals;
+import it.nikozy.twozerofoureight.util.Utilities;
 
 import static it.nikozy.twozerofoureight.util.GameConfiguration.FONT_FILE;
 import static it.nikozy.twozerofoureight.util.GameConfiguration.TIME_SCALE_FACTOR;
@@ -15,10 +15,10 @@ public class TwoZeroFourEight extends Game {
 
 	@Override
 	public void create() {
-        Globals.ASSETS = new AssetManager();
-        Globals.ASSETS.load(FONT_FILE, BitmapFont.class);
-        Globals.generateBackground();
-        Globals.ASSETS.finishLoading();
+        Utilities.ASSETS = new AssetManager();
+        Utilities.ASSETS.load(FONT_FILE, BitmapFont.class);
+        Utilities.generateBackground();
+        Utilities.ASSETS.finishLoading();
         setScreen(new GameplayScreen());
 	}
 
@@ -31,11 +31,11 @@ public class TwoZeroFourEight extends Game {
 
     @Override
     public void dispose() {
-        Globals.ASSETS.dispose();
+        Utilities.ASSETS.dispose();
     }
 
     @Override
     public void resume() {
-        Globals.ASSETS.update();
+        Utilities.ASSETS.update();
     }
 }

@@ -1,16 +1,21 @@
 package it.nikozy.twozerofoureight.util;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import it.nikozy.twozerofoureight.ui.UITile;
 
 import java.util.ArrayList;
 
 public class Grid {
-
     private class Tile {
         public int Value;
+        public int X;
+        public int Y;
 
-        Tile(int value) {
+        Tile(int value, int x, int y) {
             Value = value;
+            X = x;
+            Y = y;
         }
 
         public void clear() {
@@ -26,17 +31,20 @@ public class Grid {
 
     private int mScore;
     private Tile[] mGrid;
+    private Cell[] mTiles;
 
-    public Grid() {
+
+    public Grid(Cell[] tiles) {
+        setTiles(tiles);
         init();
     }
 
     public void init() {
+        for(Cell c : mTiles) c.clearActor();
         mGrid = new Tile[SIZE * SIZE];
-        for(int i = 0; i < SIZE * SIZE; i++) mGrid[i] = new Tile(0);
+        for(int i = 0; i < SIZE * SIZE; i++) mGrid[i] = new Tile(0, i % SIZE, i / SIZE);
         mScore = 0;
 
-        addTile();
         addTile();
     }
 
@@ -50,7 +58,11 @@ public class Grid {
 
     public void addTile() {
         ArrayList<Tile> emptyTiles = getEmptyTiles();
-        if(!emptyTiles.isEmpty()) emptyTiles.get(MathUtils.random(0, emptyTiles.size() - 1)).Value = MathUtils.random() > 0.9 ? 4 : 2;
+        if(!emptyTiles.isEmpty()) {
+            Tile tile = emptyTiles.get(MathUtils.random(0, emptyTiles.size() - 1));
+            tile.Value = MathUtils.random() > 0.9 ? 4 : 2;
+            animateTileCreation(tile.X, tile.Y, tile.Value);
+        }
     }
 
     public Tile getTile(int x, int y) {
@@ -88,18 +100,21 @@ public class Grid {
         if(direction == 0 || direction == 1)
             for(int x = SIZE - 2; x >= 0; x--) {
                 for(int y = 0; y < SIZE; y++) {
-                    int nextX = x;
-                    while(nextX != SIZE - 1 && getTile(nextX + 1, y, inverted).isEmpty()) nextX++;
-                    if(nextX != x) {
-                        getTile(nextX, y, inverted).Value = getTile(x, y, inverted).Value;
+                    if(getTile(x, y, inverted).isEmpty()) continue;
+                    int nextPos = x;
+                    while(nextPos != SIZE - 1 && getTile(nextPos + 1, y, inverted).isEmpty()) nextPos++;
+                    if(nextPos != x) {
+                        getTile(nextPos, y, inverted).Value = getTile(x, y, inverted).Value;
                         getTile(x, y, inverted).clear();
+                        if(!inverted) moveTileTo(x, y, nextPos, y); else moveTileTo(y, x, y, nextPos);
                         moved = true;
                     }
 
-                    if(nextX != SIZE - 1) if(getTile(nextX + 1, y, inverted).Value == getTile(nextX, y, inverted).Value) {
-                        getTile(nextX + 1, y, inverted).Value += getTile(nextX, y, inverted).Value;
-                        getTile(nextX, y, inverted).clear();
-                        mScore += getTile(nextX + 1, y, inverted).Value;
+                    if(nextPos != SIZE - 1) if(getTile(nextPos + 1, y, inverted).Value == getTile(nextPos, y, inverted).Value) {
+                        int value = getTile(nextPos + 1, y, inverted).Value += getTile(nextPos, y, inverted).Value;
+                        getTile(nextPos, y, inverted).clear();
+                        mScore += getTile(nextPos + 1, y, inverted).Value;
+                        if(inverted) animateTileMerging(y, nextPos + 1, getTile(nextPos + 1, y, inverted).Value, y, nextPos); else animateTileMerging(nextPos + 1, y, getTile(nextPos + 1, y, inverted).Value, nextPos, y);
                         moved = true;
                     }
                 }
@@ -107,18 +122,21 @@ public class Grid {
         else if(direction == 2 || direction == 3)
             for(int x = 1; x < SIZE; x++) {
                 for(int y = 0; y < SIZE; y++) {
-                    int nextX = x;
-                    while(nextX != 0 && getTile(nextX - 1, y, inverted).isEmpty()) nextX--;
-                    if(nextX != x) {
-                        getTile(nextX, y, inverted).Value = getTile(x, y, inverted).Value;
+                    if(getTile(x, y, inverted).isEmpty()) continue;
+                    int nextPos = x;
+                    while(nextPos != 0 && getTile(nextPos - 1, y, inverted).isEmpty()) nextPos--;
+                    if(nextPos != x) {
+                        getTile(nextPos, y, inverted).Value = getTile(x, y, inverted).Value;
                         getTile(x, y, inverted).clear();
+                        if(!inverted) moveTileTo(x, y, nextPos, y); else moveTileTo(y, x, y, nextPos);
                         moved = true;
                     }
 
-                    if(nextX != 0) if(getTile(nextX, y, inverted).Value == getTile(nextX - 1, y, inverted).Value) {
-                        getTile(nextX - 1, y, inverted).Value += getTile(nextX, y, inverted).Value;
-                        getTile(nextX, y, inverted).clear();
-                        mScore += getTile(nextX - 1, y, inverted).Value;
+                    if(nextPos != 0) if(getTile(nextPos, y, inverted).Value == getTile(nextPos - 1, y, inverted).Value) {
+                        int value = getTile(nextPos - 1, y, inverted).Value += getTile(nextPos, y, inverted).Value;
+                        getTile(nextPos, y, inverted).clear();
+                        mScore += getTile(nextPos - 1, y, inverted).Value;
+                        if(inverted) animateTileMerging(y, nextPos - 1, getTile(nextPos - 1, y, inverted).Value, y, nextPos); else animateTileMerging(nextPos - 1, y, getTile(nextPos - 1, y, inverted).Value, nextPos, y);
                         moved = true;
                     }
                 }
@@ -144,12 +162,21 @@ public class Grid {
         return true;
     }
 
-    public void moveTileTo(int x, int y, Tile tile) {
-
+    public void moveTileTo(int ix, int iy, int fx, int fy) {
+        UITile a = new UITile(getTile(fx, fy).Value);
+        mTiles[fy * SIZE + fx].setActor(a);
+        mTiles[iy * SIZE + ix].clearActor();
+        a.moveTile(ix, iy, fx, fy);
     }
 
-    public void animateTileCreation(int x, int y, Tile tile) {
+    public void animateTileCreation(int x, int y, int value) {
+        mTiles[y * SIZE + x].setActor(new UITile(value));
+    }
 
+    public void animateTileMerging(int x, int y, int value, int oldx, int oldy) {
+        UITile t = (UITile) mTiles[y * SIZE + x].getActor();
+        t.init(value);
+        mTiles[oldy * SIZE + oldx].clearActor();
     }
 
     @Override
@@ -162,5 +189,9 @@ public class Grid {
             res += "\n";
         }
         return res;
+    }
+
+    public void setTiles(Cell[] cells) {
+        mTiles = cells;
     }
 }

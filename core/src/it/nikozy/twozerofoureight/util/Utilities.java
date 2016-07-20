@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 
-public class Globals {
+public class Utilities {
     public static AssetManager ASSETS;
     public static Texture[] BACKGROUND;
 

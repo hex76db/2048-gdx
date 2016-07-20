@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import it.nikozy.twozerofoureight.ui.Tile;
+import it.nikozy.twozerofoureight.ui.UITile;
 import it.nikozy.twozerofoureight.util.Grid;
 
 import static it.nikozy.twozerofoureight.util.GameConfiguration.*;
@@ -18,6 +18,7 @@ public class GameplayScreen implements Screen {
     public final String TAG = GameplayScreen.class.getName();
 
     private Cell[] mCells;
+    private Grid mGameLogic;
     private Stage mStage;
 
     @Override
@@ -25,51 +26,51 @@ public class GameplayScreen implements Screen {
         Gdx.app.log(TAG, "show()");
         mStage = new Stage(new StretchViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT));
         mStage.setDebugAll(true);
-        mCells = new Cell[Grid.SIZE * Grid.SIZE];
+        mCells = new Cell[mGameLogic.SIZE * mGameLogic.SIZE];
 
         Table table = new Table();
         table.setFillParent(true);
         table.setTransform(true);
         mStage.addActor(table);
 
-        for(int i = 0; i < Grid.SIZE * Grid.SIZE; i++) {
-            if(i % Grid.SIZE == 0) table.row();
+        for(int i = 0; i < mGameLogic.SIZE * mGameLogic.SIZE; i++) {
+            if(i % mGameLogic.SIZE == 0) table.row();
             mCells[i] = table.add().size(128.0f);
         }
 
-        getTile(0, 0).setActor(new Tile(2));
-        getTile(1, 0).setActor(new Tile(4));
-        getTile(2, 0).setActor(new Tile(8));
-        getTile(3, 0).setActor(new Tile(16));
-        getTile(0, 1).setActor(new Tile(32));
-        getTile(1, 1).setActor(new Tile(64));
-        getTile(2, 1).setActor(new Tile(128));
-        getTile(3, 1).setActor(new Tile(256));
-        getTile(0, 2).setActor(new Tile(512));
-        getTile(1, 2).setActor(new Tile(1024));
-        getTile(2, 2).setActor(new Tile(2048));
-
-        final Grid grid = new Grid();
+        mGameLogic = new Grid(mCells);
         Gdx.input.setInputProcessor(new InputProcessor() {
             @Override
             public boolean keyDown(int keycode) {
                 switch (keycode) {
                     case Input.Keys.UP:
-                        grid.up();
-                        Gdx.app.log(TAG, "\n" + grid.toString());
+                        mGameLogic.up();
+                        Gdx.app.log(TAG, "\n" + mGameLogic.toString());
                         break;
                     case Input.Keys.DOWN:
-                        grid.down();
-                        Gdx.app.log(TAG, "\n" + grid.toString());
+                        mGameLogic.down();
+                        Gdx.app.log(TAG, "\n" + mGameLogic.toString());
                         break;
                     case Input.Keys.LEFT:
-                        grid.left();
-                        Gdx.app.log(TAG, "\n" + grid.toString());
+                        mGameLogic.left();
+                        Gdx.app.log(TAG, "\n" + mGameLogic.toString());
                         break;
                     case Input.Keys.RIGHT:
-                        grid.right();
-                        Gdx.app.log(TAG, "\n" + grid.toString());
+                        mGameLogic.right();
+                        Gdx.app.log(TAG, "\n" + mGameLogic.toString());
                         break;
+                    default:
+                        Gdx.app.log(TAG, "\n" + mGameLogic.toString());
+                        break;
+                    case Input.Keys.R:
+                        mGameLogic.init();
+                        Gdx.app.log(TAG, "\n" + mGameLogic.toString());
+                        break;
+                    case Input.Keys.A:
+                        mGameLogic.addTile();
+                        Gdx.app.log(TAG, "\n" + mGameLogic.toString());
+                        break;
+
                 }
                 return false;
             }
@@ -144,6 +145,6 @@ public class GameplayScreen implements Screen {
     }
 
     public Cell getTile(int x, int y) {
-        return mCells[y * Grid.SIZE + x];
+        return mCells[y * mGameLogic.SIZE + x];
     }
 }
